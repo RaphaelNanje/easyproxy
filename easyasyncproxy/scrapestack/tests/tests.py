@@ -7,7 +7,7 @@ import requests
 from dotenv import load_dotenv
 from requests import Response
 
-from easyproxy.scrapestack import ScrapeStackApi
+from easyasyncproxy.scrapestack import ScrapeStackApi
 
 url = 'http://httpbin.org/ip'
 load_dotenv()

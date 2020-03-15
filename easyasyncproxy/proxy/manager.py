@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 from asyncio import LifoQueue
 from typing import List, Tuple, Iterable
 from urllib.parse import urlsplit
@@ -7,8 +8,6 @@ from urllib.parse import urlsplit
 import requests
 
 from . import config
-import re
-
 from .proxy import Proxy
 
 proxy_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+):(\d+)')

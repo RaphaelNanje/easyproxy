@@ -4,8 +4,8 @@ from collections import UserList
 from time import time
 from typing import Iterable as Iterable, List
 
-from easyproxy.scraperapi.scraperkey import ScraperKey
-from easyproxy.scraperapi.utilities import logger
+from easyasyncproxy.scraperapi.scraperkey import ScraperKey
+from easyasyncproxy.scraperapi.utilities import logger
 
 
 class ScraperApiManager(UserList):

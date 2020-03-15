@@ -1,6 +1,6 @@
 import requests
 
-from easyproxy.scraperapi.utilities import logger
+from easyasyncproxy.scraperapi.utilities import logger
 
 
 class ScraperKey:

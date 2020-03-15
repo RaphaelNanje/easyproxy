@@ -6,10 +6,10 @@ import requests
 from requests import Response
 from yarl import URL
 
-from easyproxy.scraperapi import config
-from easyproxy.scraperapi.scraperkey import ScraperKey
-from easyproxy.scraperapi.manager import ScraperApiManager
-from easyproxy.scraperapi.utilities import UseCount
+from easyasyncproxy.scraperapi import config
+from easyasyncproxy.scraperapi.manager import ScraperApiManager
+from easyasyncproxy.scraperapi.scraperkey import ScraperKey
+from easyasyncproxy.scraperapi.utilities import UseCount
 
 
 class ScraperApi:

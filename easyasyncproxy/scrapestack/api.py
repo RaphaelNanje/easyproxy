@@ -6,7 +6,7 @@ import requests
 from requests import Response
 from yarl import URL
 
-from easyproxy.scrapestack import config
+from easyasyncproxy.scrapestack import config
 
 
 class ScrapeStackApi:

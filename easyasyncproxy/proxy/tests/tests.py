@@ -1,45 +1,32 @@
 import asyncio
-import os
 import unittest
-from typing import Coroutine
 
 import requests
-from dotenv import load_dotenv
 from requests import Response
+from requests.exceptions import ProxyError
 
-from easyproxy.scraperapi.api import ScraperApi
-
-load_dotenv()
+from easyasyncproxy import ProxyApi
 
 url = 'http://httpbin.org/ip'
 
-
-def load_keys():
-    keys = os.getenv('SCRAPER_API_KEYS').strip()
-    keys = keys.split(',')
-    return [k for k in keys if k]
+api = ProxyApi()
 
 
-keys = load_keys()
-
-api = ScraperApi(keys=keys)
-
-
-class TestAsyncScraperApi(unittest.TestCase):
+class TestAsyncProxyApi(unittest.TestCase):
 
     def setUp(self) -> None:
         self.loop = asyncio.get_event_loop()
 
     def test_get(self):
-        result: Response = self.do_run(api.get(url))
-
+        try:
+            result: Response = self.loop.run_until_complete(api.get(url))
+        except ProxyError:
+            print('Returned from acceptable ProxyError')
+            return
         ip = requests.get(url).json().get('origin')
         self.assertEqual(result.status_code, 200)
         self.assertTrue('origin' in result.json())
         self.assertNotEqual(ip, result.json().get('origin'))
-
-    def do_run(self, future: Coroutine):
-        return self.loop.run_until_complete(future)
 
     def tearDown(self) -> None:
         self.loop.close()

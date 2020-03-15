@@ -6,8 +6,8 @@ import requests
 from requests import Response
 from yarl import URL
 
-from easyproxy import AsyncProxyManager
-from easyproxy.proxy import config
+from easyasyncproxy import AsyncProxyManager
+from easyasyncproxy.proxy import config
 
 
 class ProxyApi:
