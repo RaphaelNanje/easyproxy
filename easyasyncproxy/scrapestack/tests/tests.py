@@ -1,11 +1,9 @@
-import asyncio
 import os
 import unittest
-from typing import Coroutine
+from unittest import IsolatedAsyncioTestCase
 
 import requests
 from dotenv import load_dotenv
-from requests import Response
 
 from easyasyncproxy.scrapestack import ScrapeStackApi
 
@@ -15,25 +13,19 @@ load_dotenv()
 key = os.getenv('SCRAPE_STACK_KEY')
 
 
-class TestAsyncScrapeStack(unittest.TestCase):
+class TestScrapeStack(IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
-        self.loop = asyncio.get_event_loop()
         self.api = ScrapeStackApi(key)
 
-    def test_get(self):
-        result: Response = self.do_run(self.api.get(url))
+    async def test_get(self):
+        loop = self._asyncioTestLoop
+        result = await self.api.get(url, loop=loop)
 
         ip = requests.get(url).json().get('origin')
         self.assertEqual(result.status_code, 200)
         self.assertTrue('origin' in result.json())
         self.assertNotEqual(ip, result.json().get('origin'))
-
-    def do_run(self, future: Coroutine):
-        return self.loop.run_until_complete(future)
-
-    def tearDown(self) -> None:
-        self.loop.close()
 
 
 if __name__ == '__main__':

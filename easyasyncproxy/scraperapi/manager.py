@@ -23,7 +23,7 @@ class ScraperApiManager(UserList):
         logger.debug('a worker is attempting to acquire a key...')
         t1 = time()
         try:
-            key = await asyncio.wait_for(self.queue.get(), timeout=120)
+            key = await asyncio.wait_for(self.queue.get(), timeout=10)
         except CancelledError:
             pass
         except TimeoutError:

@@ -1,25 +1,22 @@
-import asyncio
 import unittest
+from unittest import IsolatedAsyncioTestCase
 
 import requests
-from requests import Response
 from requests.exceptions import ProxyError
 
-from easyasyncproxy import ProxyApi
+from easyasyncproxy.proxy import ProxyApi
 
 url = 'http://httpbin.org/ip'
 
 api = ProxyApi()
 
 
-class TestAsyncProxyApi(unittest.TestCase):
+class TestAsyncProxyApi(IsolatedAsyncioTestCase):
 
-    def setUp(self) -> None:
-        self.loop = asyncio.get_event_loop()
-
-    def test_get(self):
+    async def test_get(self):
         try:
-            result: Response = self.loop.run_until_complete(api.get(url))
+            loop = self._asyncioTestLoop
+            result = await api.get(url, loop=loop)
         except ProxyError:
             print('Returned from acceptable ProxyError')
             return
@@ -27,10 +24,6 @@ class TestAsyncProxyApi(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertTrue('origin' in result.json())
         self.assertNotEqual(ip, result.json().get('origin'))
-
-    def tearDown(self) -> None:
-        self.loop.close()
-
 
 if __name__ == '__main__':
     unittest.main()

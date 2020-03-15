@@ -13,10 +13,19 @@ from easyasyncproxy.scraperapi.utilities import UseCount
 
 
 class ScraperApi:
+    """
+    https://www.scraperapi.com/
+    """
 
-    def __init__(self, headers=config.HEADERS, timeout=5,
-                 keys: Iterable = None) -> None:
-        self.headers = headers
+    def __init__(self, keys: Iterable[str], headers: dict = None,
+                 timeout=5) -> None:
+        """
+        Args:
+            keys: A list of keys to be used
+            headers: Optional headers
+            timeout: Default = 5
+        """
+        self.headers = headers or config.HEADERS
         self.timeout = timeout
         self._loop = asyncio.get_event_loop()
         self.total_uses = UseCount(0)
@@ -24,15 +33,27 @@ class ScraperApi:
         valid_keys = self.get_valid_keys(keys)
         self.manager = ScraperApiManager(valid_keys)
 
-    async def get(self, url: Union[str, URL], **kwargs):
+    async def get(self, url: Union[str, URL], loop=None, **kwargs):
+        """
+        Make a get request using the ScraperApi service
+
+        Args:
+            url: The website to scrape
+            loop: Optional loop parameter for testing
+            **kwargs: Any additional arguments that will be passed to requests
+
+        Returns: Response object
+
+        """
         key = await self.manager.acquire()
-        future = self._loop.run_in_executor(None, functools.partial(
-                requests.get,
-                config.SCRAPER_API_BASE_URL,
-                params=self._generate_params(url, key),
-                timeout=self.timeout,
-                headers=self.headers,
-                **kwargs
+        loop = loop or self._loop
+        future = loop.run_in_executor(None, functools.partial(
+            requests.get,
+            config.SCRAPER_API_BASE_URL,
+            params=self._generate_params(url, key),
+            timeout=self.timeout,
+            headers=self.headers,
+            **kwargs
         ))
         response: Response = await future
         if response.status_code == 200:
@@ -40,15 +61,26 @@ class ScraperApi:
         return response
 
     @staticmethod
-    def _generate_params(url, key: ScraperKey):
-        p = config.params.copy()
-        p['url'] = url
-        p['api_key'] = key.code
-        payload_ = ''
-        for k, v in p.items():
-            payload_ += f'{k}={v}&'
-        payload_ = payload_.strip('&')
-        return payload_
+    def _generate_params(url: str, scraper_key: ScraperKey):
+        """
+        Create a string of parameters containing API information
+
+        Args:
+            url (str): The website to be retrieved.
+            scraper_key (ScraperKey): An object containing a ScraperApi key.
+
+        Returns: A string of parameters that should be added to the ScraperApi
+        base url
+
+        """
+        parameters = config.params.copy()
+        parameters['url'] = url
+        parameters['api_key'] = scraper_key.code
+        payload = ''
+        for key, value in parameters.items():
+            payload += f'{key}={value}&'
+        payload = payload.strip('&')
+        return payload
 
     @staticmethod
     def get_valid_keys(keys):

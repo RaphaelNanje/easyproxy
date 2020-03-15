@@ -1,11 +1,9 @@
-import asyncio
 import os
 import unittest
-from typing import Coroutine
+from unittest import IsolatedAsyncioTestCase
 
 import requests
 from dotenv import load_dotenv
-from requests import Response
 
 from easyasyncproxy.scraperapi.api import ScraperApi
 
@@ -25,24 +23,15 @@ keys = load_keys()
 api = ScraperApi(keys=keys)
 
 
-class TestAsyncScraperApi(unittest.TestCase):
+class TestScraperApi(IsolatedAsyncioTestCase):
 
-    def setUp(self) -> None:
-        self.loop = asyncio.get_event_loop()
-
-    def test_get(self):
-        result: Response = self.do_run(api.get(url))
-
+    async def test_get(self):
+        loop = self._asyncioTestLoop
+        result = await api.get(url, loop=loop)
         ip = requests.get(url).json().get('origin')
         self.assertEqual(result.status_code, 200)
         self.assertTrue('origin' in result.json())
         self.assertNotEqual(ip, result.json().get('origin'))
-
-    def do_run(self, future: Coroutine):
-        return self.loop.run_until_complete(future)
-
-    def tearDown(self) -> None:
-        self.loop.close()
 
 
 if __name__ == '__main__':
