@@ -2,6 +2,7 @@ import asyncio
 import functools
 from typing import Union, Iterable
 
+import attr
 import requests
 from requests import Response
 from yarl import URL
@@ -56,9 +57,7 @@ class ScraperApi:
             **kwargs
         ))
         response: Response = await future
-        if response.status_code == 200:
-            self.total_uses += 1
-        return response
+        return ScraperApiResponse(key, response)
 
     @staticmethod
     def _generate_params(url: str, scraper_key: ScraperKey):
@@ -90,3 +89,9 @@ class ScraperApi:
             if key.enabled:
                 valid_keys.append(key)
         return valid_keys
+
+
+@attr.s(auto_attribs=True)
+class ScraperApiResponse:
+    key: ScraperKey
+    response: Response

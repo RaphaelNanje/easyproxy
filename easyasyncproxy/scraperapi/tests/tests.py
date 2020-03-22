@@ -29,9 +29,10 @@ class TestScraperApi(IsolatedAsyncioTestCase):
         loop = self._asyncioTestLoop
         result = await api.get(url, loop=loop)
         ip = requests.get(url).json().get('origin')
-        self.assertEqual(result.status_code, 200)
-        self.assertTrue('origin' in result.json())
-        self.assertNotEqual(ip, result.json().get('origin'))
+        response = result.response
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('origin' in response.json())
+        self.assertNotEqual(ip, response.json().get('origin'))
 
 
 if __name__ == '__main__':
