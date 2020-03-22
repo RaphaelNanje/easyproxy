@@ -17,11 +17,11 @@ class Proxy:
 
     @property
     def https_formatted(self):
-        return 'https//%s:%s' % (self.host, self.port)
+        return 'https://%s:%s' % (self.host, self.port)
 
     @property
     def http_formatted(self):
-        return 'http//%s:%s' % (self.host, self.port)
+        return 'http://%s:%s' % (self.host, self.port)
 
     def __str__(self) -> str:
-        return self.formatted
+        return str(self.as_dict)
