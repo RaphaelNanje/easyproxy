@@ -4,5 +4,6 @@ AsyncProxyManager: The pool handle for ProxyApi
 Proxy: A proxy data class with convenience functions
 """
 from .api import ProxyApi
+from .exceptions import BadProxyError
 from .manager import AsyncProxyManager
 from .proxy import Proxy

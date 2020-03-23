@@ -10,6 +10,7 @@ url = 'http://httpbin.org/ip'
 api = ProxyApi()
 
 
+# noinspection PyUnresolvedReferences
 class TestAsyncProxyApi(IsolatedAsyncioTestCase):
 
     async def test_get(self):
@@ -46,6 +47,23 @@ class TestAsyncProxyApi(IsolatedAsyncioTestCase):
                 await api.manager.release(result.proxy)
                 self.assertEqual(result.response.json(),
                                  dict(content='Great!'))
+                break
+
+    async def test_post_session(self):
+        loop = self._asyncioTestLoop
+
+        original_ip_json = requests.get(url).json()
+        session = requests.Session()
+        while True:
+            try:
+                result = await api.session_get(session, url, loop=loop)
+                response = result.response
+            except Exception as e:
+                print(e)
+                session.proxies.clear()
+                continue
+            else:
+                self.assertNotEqual(original_ip_json, response.json())
                 break
 
 

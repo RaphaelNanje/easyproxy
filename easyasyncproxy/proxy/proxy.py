@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 import attr
 
 
@@ -25,3 +27,8 @@ class Proxy:
 
     def __str__(self) -> str:
         return str(self.as_dict)
+
+    @classmethod
+    def from_url(cls, url: str):
+        split = urlsplit(url)
+        return Proxy(split.hostname, str(split.port))

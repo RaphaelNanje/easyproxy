@@ -70,7 +70,7 @@ class AsyncProxyManager:
         for proxy in proxies:
             self.queue.put_nowait(Proxy(*proxy))
 
-    async def acquire(self):
+    async def acquire(self) -> Proxy:
         if self.queue.qsize() == 0:
             self.refresh_proxies()
         logger.debug('grabbing proxy from queue...')
