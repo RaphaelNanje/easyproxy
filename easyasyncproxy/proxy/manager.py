@@ -10,8 +10,8 @@ import requests
 from . import config
 from .proxy import Proxy
 
-proxy_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+):(\d+)')
-url_pattern = re.compile(r'(\d+\.\d+\.\d+\.\d+)')
+proxy_pattern = re.compile(r'([\w\-]+\.[\w.-]+):(\d+)')
+url_pattern = re.compile(r'([\w\-]+\.[\w.-]+)')
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -33,30 +33,29 @@ def get_proxies(url) -> List[Tuple[str, str]]:
     find_all = format_proxies(text)
     if not find_all:
         logging.getLogger('get-proxies').debug(
-                'Unable to retrieve proxies from %s.\nResponse: %s', url,
-                response.text)
+            'Unable to retrieve proxies from %s.\nResponse: %s', url,
+            response.text)
         return []
     return find_all
 
 
 class AsyncProxyManager:
-    cagriari_mode = True
     proxies = set()
     bad_proxies = set()
-    sources = config.sources
 
     def __init__(self, links: Iterable[Tuple[str, str]] = None,
-                 max_proxies=10_000, from_file=None):
+                 max_proxies=10_000, from_file=None, free_sources=True,
+                 threads_per_proxy=None):
         self.max_proxies = max_proxies
+        self.threads_per_proxy = threads_per_proxy or 1
         links = links or []
+        self.sources = config.sources if free_sources else {}
         for link in links:
             self.add_source(link)
 
-        self.proxies_from_file = from_file or []
+        self.proxies_from_file = format_proxies('\n'.join(from_file)) or []
 
         self.queue = LifoQueue()
-
-        self.refresh_proxies()
 
     def refresh_proxies(self):
         logger.info('refreshing proxies...')
@@ -68,7 +67,8 @@ class AsyncProxyManager:
         proxies = list(self.proxies)
         random.shuffle(proxies)
         for proxy in proxies:
-            self.queue.put_nowait(Proxy(*proxy))
+            for i in range(self.threads_per_proxy):
+                self.queue.put_nowait(Proxy(*proxy))
 
     async def acquire(self) -> Proxy:
         if self.queue.qsize() == 0:
@@ -105,10 +105,10 @@ def _get_proxy_response(headers, url):
         response = requests.get(url, headers=headers, timeout=10)
     except requests.ReadTimeout:
         logging.getLogger('get-proxies').debug(
-                'Timed out while retrieving proxies from %s.', url)
+            'Timed out while retrieving proxies from %s.', url)
         raise
     if not response.status_code == 200:
         logging.getLogger('get-proxies').error(
-                'Received non200 while retrieving proxies from %s', url)
+            'Received non200 while retrieving proxies from %s', url)
         raise
     return response

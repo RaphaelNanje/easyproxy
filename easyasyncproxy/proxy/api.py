@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 class ProxyApi:
 
     def __init__(self, links=None, proxies: Iterable[tuple] = None,
-                 timeout=5, headers: dict = None, clear_on_fail=False) -> None:
+                 timeout=5, headers: dict = None, clear_on_fail=False,
+                 free_sources=True, threads_per_proxy=None) -> None:
         """
 
         Args:
@@ -30,12 +31,15 @@ class ProxyApi:
         """
         self.headers = headers or config.HEADERS
         self.timeout = timeout
+        self.clear_on_fail = clear_on_fail
 
         self._loop = asyncio.get_event_loop()
 
         from easyasyncproxy.proxy import AsyncProxyManager
-        self.manager = AsyncProxyManager(from_file=proxies, links=links or [])
-        self.clear_on_fail = True
+        self.manager = AsyncProxyManager(from_file=proxies, links=links or [],
+                                         free_sources=free_sources,
+                                         threads_per_proxy=threads_per_proxy)
+        self.manager.refresh_proxies()
 
     async def get(self, url: Union[str, URL], params: dict = None, loop=None,
                   headers: dict = None, timeout: int = None, **kwargs):
