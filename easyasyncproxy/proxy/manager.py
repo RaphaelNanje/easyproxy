@@ -1,7 +1,7 @@
 import logging
 import random
 import re
-from asyncio import LifoQueue
+from asyncio import LifoQueue, Queue
 from typing import List, Tuple, Iterable
 from urllib.parse import urlsplit
 
@@ -45,7 +45,7 @@ class AsyncProxyManager:
 
     def __init__(self, links: Iterable[Tuple[str, str]] = None,
                  max_proxies=10_000, from_file=None, free_sources=True,
-                 threads_per_proxy=None):
+                 threads_per_proxy=None, lifo=True):
         self.max_proxies = max_proxies
         self.threads_per_proxy = threads_per_proxy or 1
         links = links or []
@@ -55,7 +55,7 @@ class AsyncProxyManager:
 
         self.proxies_from_file = format_proxies('\n'.join(from_file)) or []
 
-        self.queue = LifoQueue()
+        self.queue = LifoQueue() if lifo else Queue()
 
     def refresh_proxies(self):
         logger.info('refreshing proxies...')
