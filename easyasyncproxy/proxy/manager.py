@@ -42,6 +42,7 @@ def get_proxies(url) -> List[Tuple[str, str]]:
 class AsyncProxyManager:
     proxies = set()
     bad_proxies = set()
+    proxies_from_file = set()
 
     def __init__(self, links: Iterable[Tuple[str, str]] = None,
                  max_proxies=10_000, from_file=None, free_sources=True,
@@ -52,14 +53,15 @@ class AsyncProxyManager:
         self.sources = config.sources if free_sources else {}
         for link in links:
             self.add_source(link)
-
-        self.proxies_from_file = format_proxies('\n'.join(from_file)) or []
+        if from_file:
+            self.proxies_from_file = format_proxies('\n'.join(from_file))
 
         self.queue = LifoQueue() if lifo else Queue()
 
     def refresh_proxies(self):
         logger.info('refreshing proxies...')
-        self.proxies.update(self.proxies_from_file[:self.max_proxies])
+        if self.proxies_from_file:
+            self.proxies.update(self.proxies_from_file[:self.max_proxies])
         for link in self.sources.values():
             self.proxies.update(get_proxies(link)[:self.max_proxies])
 
