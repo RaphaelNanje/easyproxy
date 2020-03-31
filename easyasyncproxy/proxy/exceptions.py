@@ -1,11 +1,8 @@
 import socket
 from typing import TYPE_CHECKING
 
-import requests
-from requests import ConnectTimeout, ReadTimeout
-from requests.exceptions import ProxyError, ChunkedEncodingError
-from urllib3.exceptions import (ConnectTimeoutError, ReadTimeoutError,
-                                MaxRetryError)
+import requests.exceptions
+import urllib3.exceptions
 
 if TYPE_CHECKING:
     from easyasyncproxy.proxy import Proxy
@@ -17,7 +14,14 @@ class BadProxyError(Exception):
         self.proxy = proxy
 
 
-bad_proxy_exceptions = (ConnectTimeoutError, ProxyError, ConnectTimeout,
-                        ReadTimeoutError, ReadTimeout, socket.timeout,
-                        requests.ConnectionError, MaxRetryError,
-                        ChunkedEncodingError)
+bad_proxy_exceptions = (
+    requests.exceptions.ProxyError,
+    requests.exceptions.ConnectTimeout,
+    requests.exceptions.ReadTimeout,
+    requests.exceptions.ConnectionError,
+    requests.exceptions.ChunkedEncodingError,
+    urllib3.exceptions.ReadTimeoutError,
+    urllib3.exceptions.MaxRetryError,
+    urllib3.exceptions.ConnectTimeoutError,
+    socket.timeout,
+)

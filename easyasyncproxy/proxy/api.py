@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class ProxyApi:
 
-    def __init__(self, links=None, proxies: Iterable[tuple] = None,
+    def __init__(self, links=None, proxies: Iterable[str] = None,
                  timeout=5, headers: dict = None, clear_on_fail=False,
                  free_sources=True, threads_per_proxy=None) -> None:
         """
@@ -54,7 +54,11 @@ class ProxyApi:
             proxies=proxy.as_dict,
             **kwargs
         ))
-        return ProxyResponseResult(proxy, await future)
+        try:
+            response = await future
+        except bad_proxy_exceptions:
+            raise BadProxyError(proxy)
+        return ProxyResponseResult(proxy, response)
 
     async def post(self, url: Union[str, URL], data: dict = None, loop=None,
                    headers: dict = None, timeout: int = None, **kwargs):
@@ -69,7 +73,11 @@ class ProxyApi:
             proxies=proxy.as_dict,
             **kwargs
         ))
-        return ProxyResponseResult(proxy, await future)
+        try:
+            response = await future
+        except bad_proxy_exceptions:
+            raise BadProxyError(proxy)
+        return ProxyResponseResult(proxy, response)
 
     async def session_post(self, session: Session, url: Union[str, URL],
                            data: dict = None, loop=None, timeout: int = None,
