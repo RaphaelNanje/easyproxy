@@ -43,7 +43,7 @@ class ProxyApi:
         self.manager = AsyncProxyManager(from_file=proxies, links=links or [],
                                          free_sources=free_sources,
                                          threads_per_proxy=threads_per_proxy,
-                                         lifo=rotating)
+                                         lifo=not rotating)
         self.manager.refresh_proxies()
 
     async def get(self, url: Union[str, URL], params: dict = None, loop=None,
