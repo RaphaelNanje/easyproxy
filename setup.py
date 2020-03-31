@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='easyasyncproxy',
-    version='1.1.2',
+    version='1.2.0',
     packages=['easyasyncproxy', 'easyasyncproxy.proxy',
               'easyasyncproxy.proxy.tests',
               'easyasyncproxy.scraperapi',

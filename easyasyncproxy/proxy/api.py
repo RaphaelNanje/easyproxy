@@ -18,7 +18,8 @@ class ProxyApi:
 
     def __init__(self, links=None, proxies: Iterable[str] = None,
                  timeout=5, headers: dict = None, clear_on_fail=False,
-                 free_sources=True, threads_per_proxy=None) -> None:
+                 free_sources=True, threads_per_proxy=None,
+                 rotating=False) -> None:
         """
 
         Args:
@@ -28,9 +29,12 @@ class ProxyApi:
             headers:
             clear_on_fail: Whether to clear proxies from session when a
                 BadProxy is raised (default: True)
+            rotating: When using rotating proxies. This enables automatically 
+                releasing proxies after fail/use
         """
         self.headers = headers or config.HEADERS
         self.timeout = timeout
+        self.rotating = True
         self.clear_on_fail = clear_on_fail
 
         self._loop = asyncio.get_event_loop()
@@ -38,7 +42,8 @@ class ProxyApi:
         from easyasyncproxy.proxy import AsyncProxyManager
         self.manager = AsyncProxyManager(from_file=proxies, links=links or [],
                                          free_sources=free_sources,
-                                         threads_per_proxy=threads_per_proxy)
+                                         threads_per_proxy=threads_per_proxy,
+                                         lifo=rotating)
         self.manager.refresh_proxies()
 
     async def get(self, url: Union[str, URL], params: dict = None, loop=None,
@@ -58,6 +63,9 @@ class ProxyApi:
             response = await future
         except bad_proxy_exceptions:
             raise BadProxyError(proxy)
+        finally:
+            if self.rotating:
+                await self.manager.release(proxy)
         return ProxyResponseResult(proxy, response)
 
     async def post(self, url: Union[str, URL], data: dict = None, loop=None,
@@ -77,6 +85,9 @@ class ProxyApi:
             response = await future
         except bad_proxy_exceptions:
             raise BadProxyError(proxy)
+        finally:
+            if self.rotating:
+                await self.manager.release(proxy)
         return ProxyResponseResult(proxy, response)
 
     async def session_post(self, session: Session, url: Union[str, URL],
@@ -100,6 +111,9 @@ class ProxyApi:
             if self.clear_on_fail:
                 session.proxies.clear()
             raise BadProxyError(proxy, str(e))
+        finally:
+            if self.rotating:
+                await self.manager.release(proxy)
         return ProxyResponseResult(proxy, response)
 
     async def session_get(self, session: Session, url: Union[str, URL],
@@ -122,7 +136,11 @@ class ProxyApi:
         except bad_proxy_exceptions as e:
             if self.clear_on_fail:
                 session.proxies.clear()
+
             raise BadProxyError(proxy, str(e))
+        finally:
+            if self.rotating:
+                await self.manager.release(proxy)
         return ProxyResponseResult(proxy, response)
 
     @staticmethod
