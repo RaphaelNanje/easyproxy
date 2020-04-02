@@ -34,7 +34,7 @@ class ProxyApi:
         """
         self.headers = headers or config.HEADERS
         self.timeout = timeout
-        self.rotating = True
+        self.rotating = rotating
         self.clear_on_fail = clear_on_fail
 
         self._loop = asyncio.get_event_loop()
