@@ -7,6 +7,8 @@ import attr
 class Proxy:
     host: str
     port: str
+    username = ''
+    password = ''
     bad = False
 
     def set_bad(self):
@@ -16,6 +18,11 @@ class Proxy:
     def as_dict(self):
         return dict(https=self.https_formatted,
                     http=self.http_formatted)
+
+    @property
+    def socks5_as_dict(self):
+        return dict(http=f'socks5://{self.host}:{self.port}',
+                    https=f'socks5://{self.host}:{self.port}')
 
     @property
     def https_formatted(self):
