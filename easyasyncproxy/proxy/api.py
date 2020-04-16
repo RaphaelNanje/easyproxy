@@ -64,7 +64,7 @@ class ProxyApi:
             raise BadProxyError(proxy)
         finally:
             if self.rotating:
-                await self.manager.release(proxy)
+                self.manager.release(proxy)
 
         return ProxyResponse(proxy, response)
 
@@ -87,7 +87,7 @@ class ProxyApi:
             raise BadProxyError(proxy)
         finally:
             if self.rotating:
-                await self.manager.release(proxy)
+                self.manager.release(proxy)
         return ProxyResponse(proxy, response)
 
     async def session_post(self, session: Session, url: Union[str, URL],
@@ -96,7 +96,7 @@ class ProxyApi:
         proxy = self.get_proxy_from_session(session)
         if not any(session.proxies):
             proxy = await self.manager.acquire()
-            session.proxies.update(proxy)
+            session.proxies.update(proxy.as_dict)
         loop = loop or self._loop
         future = loop.run_in_executor(None, functools.partial(
             session.post,
@@ -113,7 +113,7 @@ class ProxyApi:
             raise BadProxyError(proxy, str(e))
         finally:
             if self.rotating:
-                await self.manager.release(proxy)
+                self.manager.release(proxy)
         return ProxyResponse(proxy, response)
 
     async def session_get(self, session: Session, url: Union[str, URL],
@@ -140,11 +140,15 @@ class ProxyApi:
             raise BadProxyError(proxy, str(e))
         finally:
             if self.rotating:
-                await self.manager.release(proxy)
+                self.manager.release(proxy)
         return ProxyResponse(proxy, response)
+
+    def release(self, proxy: 'Proxy'):
+        self.manager.release(proxy)
 
     @staticmethod
     def get_proxy_from_session(session: Session) -> Optional['Proxy']:
+        # noinspection PyUnresolvedReferences
         proxy_dict = session.proxies.copy()
         if not any(proxy_dict):
             return None

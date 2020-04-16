@@ -81,8 +81,8 @@ class AsyncProxyManager:
 
         return proxy
 
-    async def release(self, proxy):
-        await self.queue.put(proxy)
+    def release(self, proxy):
+        self.queue.put_nowait(proxy)
         logger.debug('proxy added back to queue.')
 
     logger.debug('proxy added back to queue.')
