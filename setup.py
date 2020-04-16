@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='easyasyncproxy',
-    version='1.2.2',
+    version='2.0.0',
     packages=['easyasyncproxy', 'easyasyncproxy.proxy',
               'easyasyncproxy.proxy.tests',
               'easyasyncproxy.scraperapi',
@@ -16,6 +16,7 @@ setup(
     description='',
     install_requires=[
         'requests',
+        'requests[socks]',
         'yarl',
         'attrs',
         'urllib3'
