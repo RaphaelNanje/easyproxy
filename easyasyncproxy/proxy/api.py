@@ -2,7 +2,6 @@ import asyncio
 import functools
 from typing import Iterable, Union, TYPE_CHECKING, Optional
 
-import attr
 import requests
 from requests import Response, Session
 from yarl import URL
@@ -66,7 +65,8 @@ class ProxyApi:
         finally:
             if self.rotating:
                 await self.manager.release(proxy)
-        return ProxyResponseResult(proxy, response)
+
+        return ProxyResponse(proxy, response)
 
     async def post(self, url: Union[str, URL], data: dict = None, loop=None,
                    headers: dict = None, timeout: int = None, **kwargs):
@@ -88,7 +88,7 @@ class ProxyApi:
         finally:
             if self.rotating:
                 await self.manager.release(proxy)
-        return ProxyResponseResult(proxy, response)
+        return ProxyResponse(proxy, response)
 
     async def session_post(self, session: Session, url: Union[str, URL],
                            data: dict = None, loop=None, timeout: int = None,
@@ -114,7 +114,7 @@ class ProxyApi:
         finally:
             if self.rotating:
                 await self.manager.release(proxy)
-        return ProxyResponseResult(proxy, response)
+        return ProxyResponse(proxy, response)
 
     async def session_get(self, session: Session, url: Union[str, URL],
                           params: dict = None, loop=None, timeout: int = None,
@@ -141,7 +141,7 @@ class ProxyApi:
         finally:
             if self.rotating:
                 await self.manager.release(proxy)
-        return ProxyResponseResult(proxy, response)
+        return ProxyResponse(proxy, response)
 
     @staticmethod
     def get_proxy_from_session(session: Session) -> Optional['Proxy']:
@@ -153,7 +153,9 @@ class ProxyApi:
         return Proxy.from_url(link)
 
 
-@attr.s(auto_attribs=True)
-class ProxyResponseResult:
-    proxy: 'Proxy'
-    response: Response
+class ProxyResponse(Response):
+
+    def __init__(self, proxy: 'Proxy', response: Response) -> None:
+        super().__init__()
+        self.__dict__.update(vars(response))
+        self.proxy = proxy
