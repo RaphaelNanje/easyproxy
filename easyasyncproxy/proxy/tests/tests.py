@@ -19,15 +19,15 @@ class TestAsyncProxyApi(IsolatedAsyncioTestCase):
               'looping until we get a valid working proxy')
         while True:
             try:
-                result = await api.get(url, loop=loop)
+                response = await api.get(url, loop=loop)
             except Exception as e:
                 continue
             else:
                 ip = requests.get(url).json().get('origin')
-                response = result.response
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue('origin' in response.json())
                 self.assertNotEqual(ip, response.json().get('origin'))
+                print(response.json())
                 break
 
     async def test_post(self):
@@ -37,33 +37,34 @@ class TestAsyncProxyApi(IsolatedAsyncioTestCase):
               'looping until we get a valid working proxy')
         while True:
             try:
-                result = await api.post(post_url, loop=loop, data=dict(
+                response = await api.post(post_url, loop=loop, data=dict(
                     title='some title',
                     body='some body'
                 ))
             except Exception as e:
                 continue
             else:
-                await api.manager.release(result.proxy)
-                self.assertEqual(result.response.json(),
+                await api.manager.release(response.proxy)
+                self.assertEqual(response.json(),
                                  dict(content='Great!'))
+                print(response.json())
                 break
 
-    async def test_post_session(self):
+    async def test_get_session(self):
         loop = self._asyncioTestLoop
 
         original_ip_json = requests.get(url).json()
         session = requests.Session()
         while True:
             try:
-                result = await api.session_get(session, url, loop=loop)
-                response = result.response
+                response = await api.session_get(session, url, loop=loop)
             except Exception as e:
                 print(e)
                 session.proxies.clear()
                 continue
             else:
                 self.assertNotEqual(original_ip_json, response.json())
+                print(response.json())
                 break
 
 
