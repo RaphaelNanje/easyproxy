@@ -1,14 +1,9 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='easyasyncproxy',
     version='3.0.0',
-    packages=['easyasyncproxy', 'easyasyncproxy.proxy',
-              'easyasyncproxy.proxy.tests',
-              'easyasyncproxy.scraperapi',
-              'easyasyncproxy.scraperapi.tests',
-              'easyasyncproxy.scrapestack',
-              'easyasyncproxy.scrapestack.tests'],
+    packages=find_packages(),
     url='https://github.com/RaphaelNanje/easyproxy',
     license='MIT',
     author='Raphael Nanje',
